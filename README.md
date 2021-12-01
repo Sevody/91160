@@ -29,7 +29,13 @@ pip install -r requirements.txt
 
 2. 运行main.py
 
-   `python main.py`
+   `python3 main.py`
+
+3. 后台运行
+   `nohup python3 main.py >> output.log 2>&1 &`
+   `tail -fn 20 output.log`
+   `ps -aux | grep main.py`
+   `kill id`
 
 ## IP池接
 
@@ -37,10 +43,12 @@ pip install -r requirements.txt
 
 2. 开启 redis
 
-3. 配置 proxy_pool
+3. 配置 proxy_pool setting
+
+4. 设置 enableProxy 为 True
 
 4. 运行
 
-   `python proxyPool.py schedule`
+   `python3 proxyPool.py schedule`
 
-   `python proxyPool.py server`
+   `python3 proxyPool.py server`

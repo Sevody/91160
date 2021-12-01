@@ -18,8 +18,8 @@ enableProxy = False
 # enableProxy = True
 
 # 刷票休眠时间，频率过高会导致刷票接口拒绝请求
-# sleep_time = 1
 sleep_time = 12
+# sleep_time = 1
 
 
 # 请修改此处，或者保持为空
@@ -158,14 +158,6 @@ day_list = [
 def get_proxy():
     return requests.get("http://127.0.0.1:5010/get/").json()
 
-def get_https_proxy():
-    while True:
-        proxy = get_proxy()
-        if proxy.get("https") == True:
-            return proxy
-    
-
-
 def delete_proxy(proxy):
     requests.get("http://127.0.0.1:5010/delete/?proxy={}".format(proxy))
 
@@ -243,8 +235,8 @@ def tokens() -> str:
     if enableProxy:
         while True: 
             try:
-                proxy = get_https_proxy().get("proxy")
-                r = requests.get(url, headers=get_headers(), timeout=5, proxies={"https": "https://{}".format(proxy)})
+                proxy = get_proxy().get("proxy")
+                r = requests.get(url, headers=get_headers(), timeout=5, proxies={"http": "http://{}".format(proxy)})
                 r.encoding = r.apparent_encoding
                 soup = BeautifulSoup(r.text, "html.parser")
                 tokenValue = soup.find("input", id="tokens").attrs["value"]
@@ -301,34 +293,22 @@ def brush_ticket_new(doc_id, dep_id, weeks, days) -> list:
     while True:
         try:
             if enableProxy:
-                proxy = get_https_proxy().get("proxy")
+                proxy = get_proxy().get("proxy")
                 print("当前ip为：%s" % proxy)
-                r = session.post(url, headers=get_headers(), data=data, timeout=5, proxies={"https": "https://{}".format(proxy)})
+                r = session.post(url, headers=get_headers(), data=data, timeout=5, proxies={"http": "http://{}".format(proxy)})
                 break
             else:
-                r = session.post(url, headers=get_headers(), data=data, timeout=5)
+                r = session.post(url, headers=get_headers(), data=data)
                 break
-        except requests.exceptions.ProxyError as e:
-            print("requests.exceptions.ProxyError:===============>>>>>>>>>>>>")
-            logging.error(e)
-            delete_proxy(proxy)
-        except requests.exceptions.ConnectTimeout as e:
-            print("requests.exceptions.ConnectTimeout:===============>>>>>>>>>>>>")
-            logging.error(e)
-            delete_proxy(proxy)
-        except requests.exceptions.ConnectionError as e:
-            print("requests.exceptions.ConnectionError:===============>>>>>>>>>>>>")
-            logging.error(e)
         except Exception as e:
             logging.error(e)
-            # delete_proxy(proxy)
+            delete_proxy(proxy)
         
     json_obj = r.json()
-
     if "dates" not in json_obj:
         if "status" in json_obj:
             logging.error("Token过期，重新登陆")
-            time.sleep(1)
+            time.sleep(30)
             login(configs['username'], configs['password'])
             return []
         else:
