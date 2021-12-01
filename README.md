@@ -1,5 +1,5 @@
 # 91160
-健康160挂号
+健康160自动挂号
 
 ## 功能
 
@@ -52,3 +52,6 @@ pip install -r requirements.txt
 
    `python3 proxyPool.py server`
 
+## REF
+
+Inspired by [@pengpan](https://github.com/pengpan)
