@@ -1,6 +1,7 @@
-# health160
+# 91160
+健康160挂号
 
-## 🌱 功能
+## 功能
 
 - 自动预约
 
@@ -11,14 +12,9 @@
 
 ## 第三方库
 
-
-
-- 需要使用到的库已经放在requirements.txt，使用pip安装的可以使用指令  
-
 ```
 pip install -r requirements.txt
 ```
-
 
 
 ## 使用
@@ -33,11 +29,14 @@ pip install -r requirements.txt
 
 3. 后台运行
    `nohup python3 main.py >> output.log 2>&1 &`
+
    `tail -fn 20 output.log`
+
    `ps -aux | grep main.py`
+
    `kill id`
 
-## IP池接
+## 接入IP池
 
 1. git clone https://github.com/jhao104/proxy_pool.git
 
@@ -52,3 +51,4 @@ pip install -r requirements.txt
    `python3 proxyPool.py schedule`
 
    `python3 proxyPool.py server`
+
