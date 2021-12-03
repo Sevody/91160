@@ -28,6 +28,7 @@ pip install -r requirements.txt
    `python3 main.py`
 
 3. 后台运行
+
    `nohup python3 main.py >> output.log 2>&1 &`
 
    `tail -fn 20 output.log`
