@@ -19,7 +19,6 @@ enableProxy = False
 
 # 刷票休眠时间，频率过高会导致刷票接口拒绝请求
 sleep_time = 12
-# sleep_time = 1
 
 
 # 请修改此处，或者保持为空
@@ -34,7 +33,8 @@ configs = {
     'days': ['am','pm'],
     'unit_name': '',
     'dep_name': '',
-    'doctor_name': ''
+    'doctor_name': '',
+    'appoint_time': [2021, 12, 3, 17, 0], # 定时抢号
 }
 
 print("您的useragent临时文件夹为，有需要请复制它：%s" % tempfile.gettempdir())
@@ -240,7 +240,6 @@ def tokens() -> str:
                 r.encoding = r.apparent_encoding
                 soup = BeautifulSoup(r.text, "html.parser")
                 tokenValue = soup.find("input", id="tokens").attrs["value"]
-                print("tokenValue：%s" % tokenValue)
                 return tokenValue
             except Exception as e:
                 logging.error(e)
@@ -294,17 +293,19 @@ def brush_ticket_new(doc_id, dep_id, weeks, days) -> list:
         try:
             if enableProxy:
                 proxy = get_proxy().get("proxy")
-                print("当前ip为：%s" % proxy)
+                logging.info("当前ip为：%s" % proxy)
                 r = session.post(url, headers=get_headers(), data=data, timeout=5, proxies={"http": "http://{}".format(proxy)})
+                json_obj = r.json()
                 break
             else:
                 r = session.post(url, headers=get_headers(), data=data)
+                json_obj = r.json()
                 break
         except Exception as e:
             logging.error(e)
             delete_proxy(proxy)
+            time.sleep(1)
         
-    json_obj = r.json()
     if "dates" not in json_obj:
         if "status" in json_obj:
             logging.error("Token过期，重新登陆")
@@ -591,7 +592,18 @@ def init_data():
     set_week_configs()
     set_days_configs()
 
-
+def loop_check():
+    counter = sleep_time
+    while counter > 0:
+        time.sleep(1)
+        counter = counter - 1
+        if configs["appoint_time"]:
+            appoint = datetime.datetime(*configs["appoint_time"])
+            now = datetime.datetime.now()
+            if (now.timestamp() - appoint.timestamp() > 0):
+                logging.info('到达预约时间')
+                break
+        
 def run():
     set_logger()
     init_data()
@@ -626,9 +638,9 @@ def run():
             break
         else:
             logging.info("努力刷票中...")
-        time.sleep(sleep_time)
+        loop_check()
     logging.info("刷票结束")
-    print("当前配置为：\n\t%s" % configs)
+    logging.info("当前配置为：\n\t%s" % configs)
 
 def ramdomMath(max):
     return random.randint(0, max)
@@ -637,7 +649,7 @@ if __name__ == '__main__':
     try:
         run()
     except KeyboardInterrupt:
-        print("\n=====强制退出=====")
-        print("当前配置为：\n\t%s" % configs)
+        logging.info("\n=====强制退出=====")
+        logging.info("当前配置为：\n\t%s" % configs)
 
         exit(0)
